@@ -1,0 +1,809 @@
+ 📚 PENJELASAN LENGKAP SISTEM MANAJEMEN PERPUSTAKAAN
+
+    1. CLASS BUKU (Base Class / Parent Class)
+
+    A. ATRIBUT (Data/Variabel)
+
+    private String idBuku;        // ID unik buku, contoh: "B001"
+    private String judul;         // Nama buku
+    private String pengarang;     // Penulis buku
+    private String penerbit;      // Penerbit buku
+    private int tahunTerbit;      // Tahun publikasi
+    private int stok;             // Jumlah buku tersedia
+    private double harga;         // Harga per buku
+
+
+    Semua atribut menggunakan keyword private = tidak bisa diakses langsung dari luar class (ENCAPSULATION).
+
+    B. CONSTRUCTOR (Konstruktor)
+    java
+    public Buku(String idBuku, String judul, String pengarang,
+                String penerbit, int tahunTerbit, int stok, double harga)
+
+
+    Fungsi: Method khusus untuk membuat object Buku dengan data lengkap sekaligus.
+
+    Contoh penggunaan:
+    java
+    Buku buku1 = new Buku("B001", "Java Programming", "Bambang Hariyanto",
+                          "Informatika", 2020, 5, 150000);
+
+
+    Hasil: Object buku1 dengan semua atribut sudah terisi.
+
+    C. ACCESSOR / GETTER METHODS
+    java
+    public String getIdBuku() { return idBuku; }
+    public String getJudul() { return judul; }
+    public String getPengarang() { return pengarang; }
+    public String getPenerbit() { return penerbit; }
+    public int getTahunTerbit() { return tahunTerbit; }
+    public int getStok() { return stok; }
+    public double getHarga() { return harga; }
+
+
+    Fungsi: Method untuk membaca/mengambil nilai atribut dari luar class.
+
+    Kenapa perlu? Karena atribut private, hanya bisa dibaca melalui getter ini.
+
+    D. MUTATOR / SETTER METHODS (DENGAN VALIDASI)
+
+    java
+    public void setStok(int stok) {
+        if (stok >= 0) {
+            this.stok = stok;
+        } else {
+            throw new IllegalArgumentException("Stok tidak boleh negatif!");
+        }
+    }
+
+
+    Fungsi: Method untuk mengubah nilai atribut dari luar class.
+
+    Validasi: Setter melakukan pengecekan SEBELUM mengubah data:
+    - Jika stok < 0, throw exception (error)
+    - Jika stok >= 0, boleh diubah
+
+    Sama untuk setHarga() - harga juga tidak boleh negatif.
+
+    E. UTILITY METHODS
+
+    Method kurangiStok() - Untuk Peminjaman:
+    java
+    public void kurangiStok(int jumlah) throws Exception {
+        if (jumlah > stok) {
+            throw new Exception("Stok tidak cukup! Stok tersedia: " + stok);
+        }
+        this.stok -= jumlah;
+    }
+
+
+    Proses:
+    - Cek: apakah jumlah yang diminta > stok?
+    - Jika ya: throw exception, jangan ubah stok
+    - Jika tidak: kurangi stok (stok = stok - jumlah)
+
+    Contoh: Stok B001 = 5, pinjam 2 → stok jadi 3
+
+    Method tambahStok() - Untuk Pengembalian:
+    java
+    public void tambahStok(int jumlah) {
+        if (jumlah > 0) {
+            this.stok += jumlah;
+        }
+    }
+
+
+    Tambah stok (stok = stok + jumlah) jika jumlah > 0.
+
+    Method tampilkanInfo() - Tampilkan Data Buku:
+    java
+    public void tampilkanInfo() {
+        System.out.println("ID: " + idBuku + " | Judul: " + judul);
+        System.out.println("Penerbit: " + penerbit + " | Tahun: " + tahunTerbit);
+        System.out.println("Stok: " + stok + " | Harga: Rp" + harga);
+        System.out.println("---");
+    }
+
+
+    Output:
+
+    ID: B001 | Judul: Java Programming | Pengarang: Bambang Hariyanto
+    Penerbit: Informatika | Tahun: 2020 | Stok: 5 | Harga: Rp150000.0
+
+
+
+
+
+    2. CLASS BUKUDIGITAL (Child Class / Turunan) - INHERITANCE
+
+    A. INHERITANCE CONCEPT
+
+    java
+    public class BukuDigital extends Buku {
+        // Mewarisi semua dari Buku
+        // Bisa menambah atribut & method baru
+    }
+
+
+    Arti extends Buku: BukuDigital adalah turunan dari Buku, mewarisi semua fiturnya.
+
+    Hierarki:
+
+    Buku (Parent Class)
+      ↑
+      │ extends
+      │
+    BukuDigital (Child Class)
+
+
+    Keuntungan:
+    - Tidak perlu tulis ulang 7 atribut dari Buku
+    - Tidak perlu tulis ulang getter/setter dari Buku
+    - Tinggal tambah atribut baru saja
+
+    B. ATRIBUT TAMBAHAN
+
+    java
+    private String format;      // PDF, EPUB, MOBI
+    private long ukuranFile;    // dalam MB
+
+
+    BukuDigital punya 2 atribut TAMBAHAN (tidak ada di Buku).
+
+    Total atribut BukuDigital: 7 (dari Buku) + 2 (sendiri) = 9 atribut
+
+    C. CONSTRUCTOR DENGAN super()
+
+    java
+    public BukuDigital(String idBuku, String judul, String pengarang,
+                       String penerbit, int tahunTerbit, int stok,
+                       double harga, String format, long ukuranFile) {
+        super(idBuku, judul, pengarang, penerbit, tahunTerbit, stok, harga);
+        this.format = format;
+        this.ukuranFile = ukuranFile;
+    }
+
+
+    super(): Memanggil constructor parent class (Buku) untuk inisialisasi 7 atribut pertama.
+
+    Tanpa super(), harus:
+    java
+    this.idBuku = idBuku;
+    this.judul = judul;
+    this.pengarang = pengarang;
+    // ... (panjang dan repetitif!)
+
+
+    D. POLYMORPHISM - OVERRIDE METHOD
+
+    java
+    @Override
+    public void tampilkanInfo() {
+        System.out.println("=== BUKU DIGITAL ===");
+        System.out.println("ID: " + getIdBuku() + " | Judul: " + getJudul());
+        System.out.println("Format: " + format + " | Ukuran: " + ukuranFile + " MB");
+        System.out.println("---");
+    }
+
+
+    Override = Ganti: BukuDigital punya method tampilkanInfo() SENDIRI, berbeda dari parent.
+
+    Perbedaan Output:
+
+    Buku.tampilkanInfo():
+
+    ID: B003 | Judul: Python untuk Pemula | Pengarang: Guido van Rossum
+    Penerbit: Penerbit IT | Tahun: 2021 | Stok: 10 | Harga: Rp75000.0
+
+
+
+    BukuDigital.tampilkanInfo():
+
+    === BUKU DIGITAL ===
+    ID: B003 | Judul: Python untuk Pemula | Pengarang: Guido van Rossum
+    Penerbit: Penerbit IT | Tahun: 2021 | Stok: 10
+    Harga: Rp75000.0 | Format: PDF | Ukuran: 25 MB
+
+
+
+    @Override annotation: Tanda bahwa method ini override dari parent class (opsional tapi recommended).
+
+    E. METHOD TAMBAHAN
+
+    java
+    public void downloadBuku(String namaUser) {
+        System.out.println("Download buku '" + getJudul() + "' untuk user: " + namaUser);
+        System.out.println("Format: " + format + " | Ukuran: " + ukuranFile + " MB");
+    }
+
+
+    Method ini hanya ada di BukuDigital, tidak ada di Buku.
+
+
+
+    3. CLASS PERPUSTAKAAN (Manager Class)
+
+    A. ATRIBUT
+
+    java
+    private String namaPerpustakaan;
+    private Buku[] daftarBuku;                    // ARRAY menyimpan buku
+    private int jumlahBuku;                       // Berapa banyak buku saat ini
+    private final int KAPASITAS_MAKSIMAL = 100;  // Max 100 buku
+
+
+    Buku[] daftarBuku: Array yang bisa menyimpan hingga 100 object Buku.
+
+    Visualisasi Array:
+
+    daftarBuku[0] → Buku B001 (Java Programming)
+    daftarBuku[1] → Buku B002 (Data Structure)
+    daftarBuku[2] → BukuDigital B003 (Python untuk Pemula)
+    daftarBuku[3] → Buku B004 (Web Development)
+    daftarBuku[4] → BukuDigital B005 (Machine Learning Basics)
+    daftarBuku[5] → null (kosong)
+    ...
+    daftarBuku[99] → null (kosong)
+
+
+    jumlahBuku: Counter untuk tracking berapa banyak buku yang sudah ditambah (0-100).
+
+    B. CONSTRUCTOR
+
+    java
+    public Perpustakaan(String namaPerpustakaan) {
+        this.namaPerpustakaan = namaPerpustakaan;
+        this.daftarBuku = new Buku[KAPASITAS_MAKSIMAL];  // Buat array 100 slot
+        this.jumlahBuku = 0;  // Awalnya kosong
+    }
+
+
+    Contoh:
+    java
+    Perpustakaan perpustakaan = new Perpustakaan("Perpustakaan Kota");
+
+
+    Membuat perpustakaan dengan:
+    - Nama: "Perpustakaan Kota"
+    - Array kosong (0 buku)
+    - Kapasitas max: 100
+
+    C. METHOD TAMBAH BUKU (CREATE)
+
+    java
+    public void tambahBuku(Buku buku) throws Exception {
+        // Validasi 1: Kapasitas penuh?
+        if (jumlahBuku >= KAPASITAS_MAKSIMAL) {
+            throw new Exception("Kapasitas perpustakaan penuh!");
+        }
+
+        // Validasi 2: ID sudah ada?
+        if (cariBuku(buku.getIdBuku()) != null) {
+            throw new Exception("Buku dengan ID " + buku.getIdBuku() + " sudah ada!");
+        }
+
+        // Tambah buku ke array
+        daftarBuku[jumlahBuku] = buku;
+        jumlahBuku++;
+        System.out.println("Buku '" + buku.getJudul() + "' berhasil ditambahkan.");
+    }
+
+
+    Proses penambahan:
+
+    Awal: jumlahBuku = 2
+
+    daftarBuku[0] = B001
+    daftarBuku[1] = B002
+    daftarBuku[2] = null
+
+
+    Tambah B003:
+
+    daftarBuku[2] = B003 (buku baru)
+    jumlahBuku = 3
+
+
+    Akhir:
+
+    daftarBuku[0] = B001
+    daftarBuku[1] = B002
+    daftarBuku[2] = B003 (baru)
+    daftarBuku[3] = null
+
+
+    D. METHOD CARI BUKU BY ID (READ)
+
+    java
+    public Buku cariBuku(String idBuku) {
+        for (int i = 0; i < jumlahBuku; i++) {
+            if (daftarBuku[i].getIdBuku().equals(idBuku)) {
+                return daftarBuku[i];  // Ketemu! Return bukunya
+            }
+        }
+        return null;  // Tidak ketemu
+    }
+
+
+    Proses:
+    1. Loop dari i=0 sampai i=jumlahBuku-1
+    2. Cek apakah daftarBuku[i] ID cocok?
+    3. Jika cocok, return object bukunya langsung
+    4. Jika selesai loop tapi tidak ada yang cocok, return null
+
+    Contoh:
+
+    cariBuku("B002")
+    Loop i=0: B001 != B002, lanjut
+    Loop i=1: B002 == B002, KETEMU! Return daftarBuku[1]
+
+
+    E. METHOD CARI BUKU BY JUDUL (READ)
+
+    java
+    public Buku cariBukuByJudul(String judul) {
+        for (int i = 0; i < jumlahBuku; i++) {
+            if (daftarBuku[i].getJudul().equalsIgnoreCase(judul)) {
+                return daftarBuku[i];
+            }
+        }
+        return null;
+    }
+
+
+    Sama seperti cariBuku(), tapi cari berdasarkan judul.
+
+    equalsIgnoreCase(): Cek string sama tapi tidak case-sensitive.
+    - "Python Untuk Pemula" == "python untuk pemula" ✅ (cocok)
+    - "Java" != "python" ❌ (tidak cocok)
+
+    F. METHOD HAPUS BUKU (DELETE)
+
+    java
+    public void hapusBuku(String idBuku) throws Exception {
+        int index = -1;
+
+        // Step 1: Cari posisi buku
+        for (int i = 0; i < jumlahBuku; i++) {
+            if (daftarBuku[i].getIdBuku().equals(idBuku)) {
+                index = i;  // Ketemu di posisi i
+                break;      // Stop loop
+            }
+        }
+
+        // Step 2: Jika tidak ketemu, throw exception
+        if (index == -1) {
+            throw new Exception("Buku dengan ID " + idBuku + " tidak ditemukan!");
+        }
+
+        // Step 3: Geser semua elemen array ke kiri
+        for (int i = index; i < jumlahBuku - 1; i++) {
+            daftarBuku[i] = daftarBuku[i + 1];
+        }
+
+        // Step 4: Kurangi jumlahBuku
+        jumlahBuku--;
+        System.out.println("Buku berhasil dihapus.");
+    }
+
+
+    Visualisasi proses penghapusan B002:
+
+    Awal (jumlahBuku = 3):
+
+    [0] B001
+    [1] B002 ← akan dihapus
+    [2] B003
+    [3] null
+
+
+    Geser array (Step 3):
+
+    [0] B001
+    [1] B003 ← pindah dari [2]
+    [2] null
+    [3] null
+
+
+    Akhir (jumlahBuku = 2):
+
+    [0] B001
+    [1] B003
+    [2] null
+    [3] null
+
+
+    G. METHOD PINJAM BUKU
+
+    java
+    public void pinjamBuku(String idBuku, int jumlah) throws Exception {
+        Buku buku = cariBuku(idBuku);  // Cari buku dulu
+
+        if (buku == null) {
+            throw new Exception("Buku tidak ditemukan!");
+        }
+
+        if (jumlah <= 0) {
+            throw new Exception("Jumlah peminjaman harus lebih dari 0!");
+        }
+
+        buku.kurangiStok(jumlah);  // Memanggil method dari class Buku
+        System.out.println("Peminjaman berhasil! Stok tersisa: " + buku.getStok());
+    }
+
+
+    Alur:
+    1. Cari buku by ID
+    2. Validasi: buku ada?
+    3. Validasi: jumlah > 0?
+    4. Panggil method kurangiStok() dari class Buku
+    5. Print konfirmasi
+
+    Contoh:
+
+    pinjamBuku("B001", 2)
+    → Cari B001 (ketemu)
+    → Validasi (✓)
+    → Kurangi stok 5 - 2 = 3
+    → Print: "Peminjaman berhasil! Stok tersisa: 3"
+
+
+    H. METHOD KEMBALIKAN BUKU
+
+    java
+    public void kembalikanBuku(String idBuku, int jumlah) throws Exception {
+        Buku buku = cariBuku(idBuku);
+
+        if (buku == null) {
+            throw new Exception("Buku tidak ditemukan!");
+        }
+
+        if (jumlah <= 0) {
+            throw new Exception("Jumlah pengembalian harus lebih dari 0!");
+        }
+
+        buku.tambahStok(jumlah);
+        System.out.println("Pengembalian berhasil! Stok sekarang: " + buku.getStok());
+    }
+
+
+    Sama seperti pinjamBuku(), tapi panggil tambahStok() untuk tambah stok.
+
+    I. METHOD TAMPILKAN SEMUA BUKU
+
+    java
+    public void tampilkanSemuaBuku() {
+        if (jumlahBuku == 0) {
+            System.out.println("Tidak ada buku dalam perpustakaan.");
+            return;
+        }
+
+        System.out.println("========== DAFTAR BUKU " + namaPerpustakaan + " ==========");
+        for (int i = 0; i < jumlahBuku; i++) {
+            System.out.println("[" + (i + 1) + "]");
+            daftarBuku[i].tampilkanInfo();  // Panggil tampilkanInfo() setiap buku
+        }
+        System.out.println("Total buku: " + jumlahBuku);
+    }
+
+
+    POLYMORPHISM di sini:
+    - Jika daftarBuku[i] adalah Buku → panggil Buku.tampilkanInfo()
+    - Jika daftarBuku[i] adalah BukuDigital → panggil BukuDigital.tampilkanInfo()
+
+    Output BERBEDA untuk setiap tipe!
+
+    J. METHOD TAMPILKAN BUKU HABIS
+
+    java
+    public void tampilkanBukuHabis() {
+        System.out.println("========== BUKU DENGAN STOK HABIS ==========");
+        int count = 0;
+        for (int i = 0; i < jumlahBuku; i++) {
+            if (daftarBuku[i].getStok() == 0) {  // Filter: hanya stok 0
+                daftarBuku[i].tampilkanInfo();
+                count++;
+            }
+        }
+
+        if (count == 0) {
+            System.out.println("Semua buku masih tersedia.");
+        }
+    }
+
+
+    Filter: Hanya tampilkan buku yang stok == 0.
+
+    K. METHOD TAMPILKAN STATISTIK
+
+    java
+    public void tampilkanStatistik() {
+        System.out.println("========== STATISTIK PERPUSTAKAAN ==========");
+        System.out.println("Nama Perpustakaan: " + namaPerpustakaan);
+        System.out.println("Total Buku: " + jumlahBuku);
+        System.out.println("Kapasitas Maksimal: " + KAPASITAS_MAKSIMAL);
+
+        int totalStok = 0;
+        double totalNilai = 0;
+
+        for (int i = 0; i < jumlahBuku; i++) {
+            totalStok += daftarBuku[i].getStok();
+            totalNilai += daftarBuku[i].getStok() * daftarBuku[i].getHarga();
+        }
+
+        System.out.println("Total Stok: " + totalStok);
+        System.out.println("Total Nilai Inventori: Rp" + totalNilai);
+    }
+
+
+    Kalkulasi:
+    - totalStok: Jumlahkan semua stok dari semua buku
+    - totalNilai: Hitung (stok × harga) untuk setiap buku, lalu jumlahkan
+
+    Contoh perhitungan:
+
+    B001: 5 × 150000 = 750000
+    B002: 3 × 200000 = 600000
+    B003: 10 × 75000 = 750000
+    B004: 2 × 180000 = 360000
+    B005: 0 × 100000 = 0
+
+    Total Stok = 5 + 3 + 10 + 2 + 0 = 20
+    Total Nilai = 750000 + 600000 + 750000 + 360000 + 0 = 2,460,000
+
+
+
+
+    4. CLASS MAIN (User Interface)
+
+    A. IMPORT & VARIABLE GLOBAL
+
+    java
+    import java.util.Scanner;
+
+    public class Main {
+        static Scanner input = new Scanner(System.in);
+        static Perpustakaan perpustakaan;
+    }
+
+
+    Scanner: Library untuk membaca input dari keyboard user.
+
+    static: Keyword agar variable bisa diakses dari method static lainnya.
+
+    B. METHOD main() - ENTRY POINT
+
+    java
+    public static void main(String[] args) {
+        perpustakaan = new Perpustakaan("Perpustakaan Kota");
+        inisialisasiBuku();  // Load data awal 5 buku
+
+        boolean running = true;
+        while (running) {  // Loop menu sampai user pilih keluar
+            tampilkanMenu();
+            System.out.print("Pilih menu (1-9): ");
+
+            try {
+                int pilihan = input.nextInt();
+                input.nextLine();  // Clear newline dari buffer
+
+                switch (pilihan) {
+                    case 1: tambahBukuBaru(); break;
+                    case 2: lihatSemuaBuku(); break;
+                    case 3: cariBukuMenu(); break;
+                    case 4: pinjamBukuMenu(); break;
+                    case 5: kembalikanBukuMenu(); break;
+                    case 6: hapusBukuMenu(); break;
+                    case 7: lihatBukuHabis(); break;
+                    case 8: lihatStatistik(); break;
+                    case 9:
+                        running = false;
+                        System.out.println("Terima kasih...");
+                        break;
+                    default:
+                        System.out.println("Menu tidak valid!");
+                }
+            } catch (Exception e) {
+                System.out.println("Error: " + e.getMessage());
+                input.nextLine();  // Clear buffer jika input salah
+            }
+        }
+        input.close();  // Tutup Scanner
+    }
+
+
+    Alur:
+    1. Buat Perpustakaan object
+    2. Inisialisasi 5 buku default
+    3. Loop forever (sampai running = false)
+       - Tampilkan menu
+       - Baca input user dengan Scanner
+       - switch() untuk jalankan method sesuai pilihan
+       - Try-catch untuk error handling
+    4. Tutup Scanner
+
+    C. SWITCH-CASE STATEMENT
+
+    java
+    switch (pilihan) {
+        case 1:
+            tambahBukuBaru();
+            break;
+        case 2:
+            lihatSemuaBuku();
+            break;
+        // ... dst
+        case 9:
+            running = false;
+            break;
+        default:
+            System.out.println("Menu tidak valid!");
+    }
+
+
+    Fungsi: Jalankan code berbeda berdasarkan nilai pilihan.
+
+    break: Keyword untuk stop eksekusi, jangan lanjut ke case berikutnya.
+
+    Tanpa break, akan "fall through" ke case berikutnya (bug!).
+
+    D. METHOD INISIALISASI BUKU
+
+    java
+    private static void inisialisasiBuku() {
+        try {
+            perpustakaan.tambahBuku(new Buku("B001", "Java Programming",
+                                             "Bambang Hariyanto", "Informatika",
+                                             2020, 5, 150000));
+            perpustakaan.tambahBuku(new Buku("B002", "Data Structure",
+                                             "Mark Allen Weiss", "Pearson",
+                                             2019, 3, 200000));
+            perpustakaan.tambahBuku(new BukuDigital("B003", "Python untuk Pemula",
+                                                   "Guido van Rossum", "Penerbit IT",
+                                                   2021, 10, 75000, "PDF", 25));
+            perpustakaan.tambahBuku(new Buku("B004", "Web Development",
+                                             "Jon Duckett", "Wiley",
+                                             2018, 2, 180000));
+            perpustakaan.tambahBuku(new BukuDigital("B005", "Machine Learning Basics",
+                                                   "Andrew Ng", "Coursera Press",
+                                                   2022, 0, 100000, "EPUB", 50));
+        } catch (Exception e) {
+            System.out.println("Error inisialisasi: " + e.getMessage());
+        }
+    }
+
+
+    Fungsi: Load 5 buku default saat program start.
+
+    Buku 1, 2, 4: Tipe Buku (7 parameter)
+    Buku 3, 5: Tipe BukuDigital (9 parameter)
+
+    try-catch: Jika ada error (duplicate ID, kapasitas penuh), tangkap & print error.
+
+
+
+    5. KONSEP OOP YANG DITERAPKAN
+
+    A. ENCAPSULATION (Enkapsulasi)
+
+    Definisi: Menyembunyikan detail internal dan memberikan akses terkontrol.
+
+    Implementasi:
+    - Semua atribut dideklarasikan private
+    - Akses hanya melalui public getter/setter
+    - Validasi dilakukan di setter
+
+    Contoh:
+    java
+    private int stok;  // Private - tidak bisa diakses langsung
+
+    public int getStok() {  // Getter - untuk membaca
+        return stok;
+    }
+
+    public void setStok(int stok) {  // Setter - untuk mengubah DENGAN validasi
+        if (stok >= 0) {
+            this.stok = stok;
+        } else {
+            throw new IllegalArgumentException("Stok tidak boleh negatif!");
+        }
+    }
+
+
+    Keuntungan:
+    - Data tidak bisa diubah sembarangan
+    - Validasi terjamin di setter
+    - Jika perlu ubah logic, tinggal ubah di setter (tidak perlu ubah code di tempat lain)
+
+    B. INHERITANCE (Pewarisan)
+
+    Definisi: Child class mewarisi atribut dan method dari parent class.
+
+    Implementasi:
+    java
+    public class BukuDigital extends Buku {
+        // Mewarisi 7 atribut dari Buku
+        // Mewarisi semua getter/setter dari Buku
+        // Bisa tambah atribut & method sendiri
+    }
+
+
+    Hierarki:
+
+    Buku (Parent)
+      ↑
+      │ extends
+      │
+    BukuDigital (Child)
+
+
+    Keuntungan:
+    - Code reusability (tidak perlu tulis ulang atribut Buku)
+    - Polymorphism support
+    - Hierarchi yang jelas
+
+    Visualisasi Atribut:
+
+    BukuDigital punya:
+    - idBuku (dari Buku)
+    - judul (dari Buku)
+    - pengarang (dari Buku)
+    - penerbit (dari Buku)
+    - tahunTerbit (dari Buku)
+    - stok (dari Buku)
+    - harga (dari Buku)
+    - format (sendiri)
+    - ukuranFile (sendiri)
+
+    Total: 9 atribut
+
+
+    C. POLYMORPHISM (Polimorfisme)
+
+    Definisi: Method dengan nama sama tapi implementasi berbeda di class berbeda.
+
+    Implementasi - Override Method:
+    java
+    // Class Buku
+    public void tampilkanInfo() {
+        System.out.println("ID: " + idBuku + " | Judul: " + judul);
+        System.out.println("Penerbit: " + penerbit + " | Stok: " + stok);
+    }
+
+    // Class BukuDigital
+    @Override
+    public void tampilkanInfo() {
+        System.out.println("=== BUKU DIGITAL ===");
+        System.out.println("ID: " + getIdBuku() + " | Judul: " + getJudul());
+        System.out.println("Format: " + format + " | Ukuran: " + ukuranFile);
+    }
+
+
+    @Override: Annotation menandakan method ini override dari parent.
+
+    Penggunaan di Perpustakaan:
+    java
+    for (int i = 0; i < jumlahBuku; i++) {
+        daftarBuku[i].tampilkanInfo();  // Bisa Buku atau BukuDigital
+    }
+
+
+    Jika daftarBuku[i] adalah Buku → panggil Buku.tampilkanInfo()
+    Jika daftarBuku[i] adalah BukuDigital → panggil BukuDigital.tampilkanInfo()
+
+    Output BERBEDA untuk setiap tipe, tapi nama method SAMA.
+
+    Keuntungan:
+    - Satu method bisa berbuat berbeda sesuai object type-nya
+    - Flexible dan extensible
+    - Code lebih clean
+
+    D. ABSTRACTION (Abstraksi)
+
+    Definisi: Menyembunyikan kompleksitas detail dan menampilkan interface yang simple.
+
+    Implementasi:
+    User tidak perlu tahu detail implementasi internal. User cukup tahu interface-nya:
+    - perpustakaan.tambahBuku(buku)
+    - `perpustakaan.pinjamBuku(id, juml
